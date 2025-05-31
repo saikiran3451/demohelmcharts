@@ -26,18 +26,18 @@ spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "helloworld-chart.serviceAccountName" . }}
+    serviceAccountName: {{ include "helloworld-chart.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-       name: {{ helloworld-chart }}
+        - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+
           image: "{{ kiranuser/mypythonapp }}:{{ latest }}"
           imagePullPolicy: {{ Ifnotpresent }}
           ports:

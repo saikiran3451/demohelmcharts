@@ -6,7 +6,7 @@ metadata:
     {{- include "helloworld-chart.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ 2 }}
+  replicas: {{ .Values.replicaCount | default 2 }}
   {{- end }}
   selector:
     matchLabels:
@@ -26,7 +26,8 @@ spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    serviceAccountName: {{ include "helloworld-chart.serviceAccountName" . }}
+      {{- end }}
+      serviceAccountName: {{ include "helloworld-chart.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -37,12 +38,11 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-
-          image: "{{ kiranuser/mypythonapp }}:{{ latest }}"
-          imagePullPolicy: {{ Ifnotpresent }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
-              containerPort: {{ 80 }}
+              containerPort: {{ .Values.containerPort | default 80 }}
               protocol: TCP
           {{- with .Values.livenessProbe }}
           livenessProbe:
@@ -52,27 +52,3 @@ spec:
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
-      volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
